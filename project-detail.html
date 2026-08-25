@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <!-- Basic Meta Tags -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aditya Pranoto | Web Developer & Cybersecurity Enthusiast</title>
+    <meta
+      name="description"
+      content="Portfolio of Aditya Pranoto, a Web Developer and Cybersecurity Enthusiast specializing in Laravel, secure web development, penetration testing, and CTF challenges."
+    />
+    <meta
+      name="keywords"
+      content="Aditya Pranoto, Seraphim, Web Developer, Cybersecurity, Pentester, Penetration Testing, Laravel Developer, PHP Developer, Secure Coding, CTF Player, Capture The Flag, Ethical Hacking"
+    />
+    <meta name="author" content="Aditya Pranoto" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#09090B" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://adtylabs.vercel.app/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Open Graph Social Media -->
+    <meta
+      property="og:title"
+      content="Aditya Pranoto | Web Developer & Cybersecurity Enthusiast"
+    />
+    <meta
+      property="og:description"
+      content="Web Developer, Cybersecurity Enthusiast, and CTF Player."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://adtylabs.vercel.app" />
+    <meta property="og:site_name" content="AdtyLabs" />
+    <meta
+      property="og:image"
+      content="https://adtylabs.vercel.app/og-image.png"
+    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Aditya Pranoto | Web Developer & Cybersecurity Enthusiast"
+    />
+    <meta
+      name="twitter:description"
+      content="Web Developer, Cybersecurity Enthusiast, and CTF Player."
+    />
+    <meta
+      name="twitter:image"
+      content="https://adtylabs.vercel.app/assets/images/og-image.jpg"
+    />
+    <meta name="twitter:url" content="https://adtylabs.vercel.app/" />
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+
+        "name": "Aditya Pranoto",
+        "alternateName": "Seraphim",
+
+        "url": "https://adtylabs.vercel.app",
+
+        "description": "Web Developer, Cybersecurity Enthusiast, and CTF Player with interests in Penetration Testing, Secure Coding, Application Security, and Modern Web Development.",
+
+        "jobTitle": "Web Developer & Junior Pentester",
+
+        "image": "https://adtylabs.vercel.app/assets/images/profile.jpg",
+
+        "nationality": {
+          "@type": "Country",
+          "name": "Indonesia"
+        },
+
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "University of Technology Yogyakarta"
+        },
+
+        "knowsAbout": [
+          "Web Development",
+          "Full Stack Development",
+          "Laravel",
+          "PHP",
+          "JavaScript",
+          "Tailwind CSS",
+          "MySQL",
+          "Cybersecurity",
+          "Penetration Testing",
+          "Web Application Security",
+          "Secure Coding",
+          "Vulnerability Assessment",
+          "Ethical Hacking",
+          "Digital Forensics",
+          "Cryptography",
+          "Reverse Engineering",
+          "Cloud Security",
+          "Android Security",
+          "Capture The Flag",
+          "CTF",
+          "OSINT"
+        ],
+
+        "sameAs": [
+          "https://github.com/Adty19",
+          "https://www.linkedin.com/in/adty/",
+          "https://ctftime.org/team/408539",
+          "https://ctf.hackthebox.com/user/profile/1071299"
+        ]
+      }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind (CDN / Play) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              bg: {
+                primary: "#09090B",
+                secondary: "#0F172A",
+                tertiary: "#111827",
+              },
+              accent: {
+                blue: "#3B82F6",
+                indigo: "#6366F1",
+                violet: "#8B5CF6",
+                cyan: "#06B6D4",
+              },
+            },
+            fontFamily: {
+              display: ['"Plus Jakarta Sans"', "sans-serif"],
+              body: ["Inter", "sans-serif"],
+              mono: ['"JetBrains Mono"', "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Lenis smooth scroll -->
+    <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+
+    <!-- Motion (motion.dev — Framer Motion's engine) for spring-physics micro-interactions -->
+    <script src="https://cdn.jsdelivr.net/npm/motion@11.13.5/dist/motion.js"></script>
+
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/project-detail.css" />
+  </head>
+
+  <body
+    class="bg-bg-primary text-white font-body antialiased selection:bg-accent-violet/40 selection:text-white"
+  >
+    <!-- Loader -->
+    <div id="loader" class="loader">
+      <div class="loader-inner">
+        <div class="loader-logo">
+          AdtyLabs<span class="text-accent-violet">.</span>
+        </div>
+        <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        <p class="loader-text">Loading....<span class="dots"></span></p>
+      </div>
+    </div>
+
+    <!-- Background Layers-->
+    <div class="bg-layers" aria-hidden="true">
+      <div class="mesh-gradient mesh-1"></div>
+      <div class="mesh-gradient mesh-2"></div>
+      <div class="mesh-gradient mesh-3"></div>
+      <canvas id="particleCanvas" class="particle-canvas"></canvas>
+      <div class="noise-overlay"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header id="detailNav" class="detail-nav">
+      <a href="index.html" class="detail-nav-back" data-reveal>
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Portfolio</span>
+      </a>
+
+      <nav class="detail-nav-tabs" data-reveal>
+        <a href="#overview" class="detail-tab active" data-tab="overview"
+          >Overview</a
+        >
+        <a href="#tech-stack" class="detail-tab" data-tab="tech-stack"
+          >Tech Stack</a
+        >
+        <a href="#screenshots" class="detail-tab" data-tab="screenshots"
+          >Screenshots</a
+        >
+        <span class="detail-tab-indicator" id="tabIndicator"></span>
+      </nav>
+
+      <a
+        id="navDemoBtn"
+        href="#"
+        target="_blank"
+        rel="noopener"
+        class="detail-nav-cta"
+        data-reveal
+      >
+        <span>Live Demo</span>
+        <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+      </a>
+    </header>
+
+    <main id="main-content">
+      <!-- Hero Section -->
+      <section id="detail-hero" class="detail-hero">
+        <div class="detail-hero-glow" aria-hidden="true"></div>
+
+        <div class="detail-hero-center">
+          <div class="detail-hero-meta" data-hero>
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span id="heroCategory">Category</span>
+            <span class="detail-hero-meta-dot">·</span>
+            <span id="heroYear">Year</span>
+          </div>
+
+          <h1 class="detail-hero-title" id="heroTitle" data-hero>
+            Project Title
+          </h1>
+
+          <div class="detail-hero-badges" id="heroTechBadges" data-hero></div>
+
+          <div class="detail-hero-actions" data-hero>
+            <a
+              id="heroDemoBtn"
+              href="#"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-primary magnetic"
+            >
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>Live Demo</span>
+            </a>
+            <a
+              id="heroGithubBtn"
+              href="#"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-secondary magnetic"
+            >
+              <i data-lucide="github" class="w-4 h-4"></i>
+              <span>Github</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="detail-hero-showcase" data-hero>
+          <div class="detail-hero-showcase-frame">
+            <img
+              id="heroThumb"
+              src=""
+              alt=""
+              class="lazy-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Overview -->
+      <section id="overview" class="section detail-section">
+        <div class="detail-content-col">
+          <p class="eyebrow" data-reveal>Overview</p>
+          <h2 class="section-title" data-reveal>Project Overview</h2>
+          <p class="detail-overview-desc" id="overviewDesc" data-reveal></p>
+
+          <div class="detail-divider" data-reveal></div>
+
+          <div class="detail-block" data-reveal>
+            <h3 class="detail-block-title">
+              <i data-lucide="flag" class="w-4 h-4"></i> Challenge
+            </h3>
+            <p class="detail-block-text" id="overviewChallenge"></p>
+          </div>
+
+          <div class="detail-block" data-reveal>
+            <h3 class="detail-block-title">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i> Solution
+            </h3>
+            <p class="detail-block-text" id="overviewSolution"></p>
+          </div>
+
+          <div class="detail-divider" data-reveal></div>
+
+          <div class="detail-block" data-reveal>
+            <h3 class="detail-block-title">
+              <i data-lucide="list-checks" class="w-4 h-4"></i> Key Features
+            </h3>
+            <ul class="detail-feature-list" id="overviewFeatures"></ul>
+          </div>
+
+          <div class="detail-divider" data-reveal></div>
+
+          <div class="detail-block detail-result" data-reveal>
+            <h3 class="detail-block-title">
+              <i data-lucide="trophy" class="w-4 h-4"></i> Result
+            </h3>
+            <p class="detail-block-text" id="overviewResult"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technology Stack -->
+      <section id="tech-stack" class="section detail-section">
+        <div class="section-inner text-center">
+          <p class="eyebrow" data-reveal>Under the Hood</p>
+          <h2 class="section-title" data-reveal>Tech Stack</h2>
+          <p class="section-desc" style="margin: 0 auto" data-reveal>
+            Tools &amp; technologies used to design, build, and ship this
+            project.
+          </p>
+        </div>
+
+        <div class="tech-stack-grid section-inner" id="techStackGrid"></div>
+      </section>
+
+      <!-- Screenshots -->
+      <section id="screenshots" class="section detail-section">
+        <div class="section-inner text-center">
+          <p class="eyebrow" data-reveal>Gallery</p>
+          <h2 class="section-title" data-reveal>Screenshots</h2>
+        </div>
+
+        <div class="screenshot-gallery" id="screenshotGallery"></div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-gradient-line"></div>
+      <div class="section-inner footer-grid">
+        <div class="footer-brand">
+          <a href="index.html#home" class="navbar-logo"
+            >AdtyLabs<span class="text-accent-violet">.</span></a
+          >
+          <p>
+            Passionate about Web Development, Cybersecurity, and secure software
+            engineering. Focused on building scalable applications,
+            strengthening application security, and continuously exploring
+            modern technologies.
+          </p>
+        </div>
+        <div class="footer-links">
+          <h4>Navigation</h4>
+          <a href="index.html#about">About</a>
+          <a href="index.html#projects">Projects</a>
+          <a href="index.html#experience">Experience</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="footer-social">
+          <h4>Follow</h4>
+          <div class="flex gap-3">
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener"
+              class="social-icon"
+            >
+              <i data-lucide="github" class="w-4 h-4"></i>
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener"
+              class="social-icon"
+            >
+              <i data-lucide="linkedin" class="w-4 h-4"></i>
+            </a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener"
+              class="social-icon"
+            >
+              <i data-lucide="instagram" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="section-inner footer-bottom detail-footer-bottom">
+        <p>© <span id="year"></span> Aditya Pranoto. All rights reserved.</p>
+        <a href="index.html" class="detail-footer-link">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to all
+          projects
+        </a>
+      </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button
+      id="backToTop"
+      class="back-to-top magnetic"
+      aria-label="Back to top"
+    >
+      <i data-lucide="arrow-up" class="w-4 h-4"></i>
+    </button>
+
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/project-detail.js"></script>
+  </body>
+</html>
