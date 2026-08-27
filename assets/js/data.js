@@ -572,3 +572,30 @@ const CERTIFICATIONS = [
     type: "award",
   },
 ];
+
+const ARTICLES = [
+  {
+    image: "https://placehold.co/600x400/111827/8b5cf6?text=Article",
+    name: "What Is Cybersecurity? Fundamentals to Understand Before Learning Hacking",
+    issuer: "Medium",
+    date: "August 2026",
+    url: "https://medium.com/@adtyyyy/what-is-cybersecurity-fundamentals-to-understand-before-learning-hacking-fa92a444c434",
+  },
+  {
+    image: "https://placehold.co/600x400/111827/3b82f6?text=Article",
+    name: "Analyzing Android malware disguised as a digital wedding invitation",
+    issuer: "Medium",
+    date: "August 2026",
+    url: "https://medium.com/@adtyyyy/analyzing-android-malware-disguised-as-a-digital-wedding-invitation-4bd9c9cab79d",
+  },
+];
+
+const PUBLICATIONS = [
+  {
+    image: "https://placehold.co/600x400/111827/06b6d4?text=Publication",
+    name: "The Role of Augmented Reality in Introducing the Human Digestive System to Elementary School Children",
+    issuer: "KLIK: Kajian Ilmiah Informatika dan Komputer",
+    date: "December 2023",
+    url: "https://djournals.com/klik/article/view/1441",
+  },
+];

@@ -7,56 +7,115 @@ const AutoScroll = {
   },
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  /* --- Render dynamic content first --- */
-  renderTechMarquee();
-  renderEducation();
-  renderExperience();
-  renderProjects();
-  renderCertifications();
+function safeInit(fn, ...args) {
+  try {
+    return fn(...args);
+  } catch (err) {
+    console.warn(`[init] "${fn.name || "anonymous"}" failed, skipping:`, err);
+    return null;
+  }
+}
 
-  initLazyImages();
+document.addEventListener("DOMContentLoaded", () => {
+  const loaderFailsafe = setTimeout(() => forceHideLoader(), 6000);
+
+  /* --- Render dynamic content first --- */
+  safeInit(renderTechMarquee);
+  safeInit(renderEducation);
+  safeInit(renderExperience);
+  safeInit(renderProjects);
+  safeInit(renderCertifications);
+  safeInit(renderArticlesPublications);
+
+  safeInit(initLazyImages);
 
   // Lucide icons
-  if (window.lucide) lucide.createIcons();
+  if (window.lucide) safeInit(() => lucide.createIcons());
 
-  fixBrandIcons();
+  safeInit(fixBrandIcons);
 
   // Footer year
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* --- Loader --- */
-  runLoader();
+  /* --- Loader (self-guards if GSAP failed to load) --- */
+  safeInit(runLoader, loaderFailsafe);
 
-  /* --- Lenis smooth scroll --- */
-  const lenis = initLenis();
+  /* --- Lenis smooth scroll (falls back to native scroll if missing) --- */
+  const lenis = safeInit(initLenis) || createLenisFallback();
 
-  /* --- GSAP setup --- */
-  gsap.registerPlugin(ScrollTrigger);
-  lenis.on("scroll", ScrollTrigger.update);
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
-  gsap.ticker.lagSmoothing(0);
+  /* --- GSAP + ScrollTrigger setup (optional enhancement) --- */
+  if (window.gsap && window.ScrollTrigger) {
+    safeInit(() => {
+      gsap.registerPlugin(ScrollTrigger);
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((time) => {
+        lenis.raf(time * 1000);
+      });
+      gsap.ticker.lagSmoothing(0);
+    });
+  }
 
-  /* --- Interactions --- */
-  initNavbar(lenis);
-  initMobileMenu(lenis);
-  initScrollReveal();
-  initHeroParallax();
-  initTypedStack();
-  initMarqueeHoverPause();
-  initCounters();
-  initCertModal();
-  initContactForm();
-  initBackToTop(lenis);
-  initMagnetic();
-  initParticles();
-  initExploreAutoScroll(lenis);
-  initMotionInteractions();
-  initServiceWorker();
+  /* --- Interactions: each isolated so one failure can't block another --- */
+  safeInit(initNavbar, lenis);
+  safeInit(initMobileMenu, lenis);
+  safeInit(initScrollReveal);
+  safeInit(initHeroParallax);
+  safeInit(initTypedStack);
+  safeInit(initMarqueeHoverPause);
+  safeInit(initCounters);
+  safeInit(initCertModal);
+  safeInit(initContactForm);
+  safeInit(initBackToTop, lenis);
+  safeInit(initMagnetic);
+  safeInit(initParticles, lenis);
+  safeInit(initExploreAutoScroll, lenis);
+  safeInit(initMotionInteractions);
+  safeInit(initServiceWorker);
+
+  if (window.gsap && window.ScrollTrigger) {
+    const refresh = () => ScrollTrigger.refresh();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(refresh).catch(() => {});
+    }
+    window.addEventListener("load", refresh);
+
+    setTimeout(refresh, 1500);
+  }
 });
+
+function createLenisFallback() {
+  return {
+    on() {},
+    raf() {},
+    scrollTo(target, opts = {}) {
+      const behavior = "smooth";
+      if (typeof target === "number") {
+        window.scrollTo({ top: target, behavior });
+        return;
+      }
+      const el =
+        target instanceof Element ? target : document.querySelector(target);
+      if (!el) return;
+      const offset = opts.offset || 0;
+      const top = el.getBoundingClientRect().top + window.pageYOffset + offset;
+      window.scrollTo({ top, behavior });
+    },
+  };
+}
+
+function forceHideLoader() {
+  const loader = document.getElementById("loader");
+  if (!loader || loader.dataset.hidden === "true") return;
+  loader.dataset.hidden = "true";
+  loader.style.transition = "opacity .3s ease";
+  loader.style.opacity = "0";
+  document.body.style.overflow = "";
+  setTimeout(() => {
+    loader.style.display = "none";
+  }, 300);
+  revealHero();
+}
 
 function fixBrandIcons() {
   const PATHS = {
@@ -91,35 +150,65 @@ function fixBrandIcons() {
 }
 
 /* Loader */
-function runLoader() {
+function runLoader(failsafeTimer) {
   const loader = document.getElementById("loader");
   const fill = document.querySelector(".loader-bar-fill");
-  document.body.style.overflow = "hidden";
-  const tl = gsap.timeline();
+  if (!loader) return;
 
-  tl.to(fill, { width: "100%", duration: 1.4, ease: "power2.inOut" })
-    .to(
-      ".loader-inner",
-      { opacity: 0, scale: 0.92, duration: 0.5, ease: "power2.in" },
-      "+=0.15",
-    )
-    .to(
-      loader,
-      {
-        opacity: 0,
-        duration: 0.6,
-        ease: "power2.inOut",
-        onComplete: () => {
-          loader.style.display = "none";
-          document.body.style.overflow = "";
-          revealHero();
-        },
-      },
-      "-=0.1",
-    );
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    clearTimeout(failsafeTimer);
+    loader.dataset.hidden = "true";
+    loader.style.display = "none";
+    document.body.style.overflow = "";
+    revealHero();
+  };
+
+  if (!window.gsap || !fill) {
+    document.body.style.overflow = "hidden";
+    loader.style.transition = "opacity .4s ease";
+    requestAnimationFrame(() => {
+      loader.style.opacity = "0";
+    });
+    setTimeout(finish, 450);
+    return;
+  }
+
+  document.body.style.overflow = "hidden";
+
+  try {
+    const tl = gsap.timeline({ onComplete: finish });
+
+    tl.to(fill, { width: "100%", duration: 1.4, ease: "power2.inOut" })
+      .to(
+        ".loader-inner",
+        { opacity: 0, scale: 0.92, duration: 0.5, ease: "power2.in" },
+        "+=0.15",
+      )
+      .to(loader, { opacity: 0, duration: 0.6, ease: "power2.inOut" }, "-=0.1");
+  } catch (err) {
+    console.warn("Loader animation failed, revealing page immediately:", err);
+    finish();
+  }
 }
 
 function revealHero() {
+  if (!window.gsap) {
+    // No GSAP available — just make everything visible, no animation.
+    document
+      .querySelectorAll(
+        ".navbar, .hero-eyebrow, .hero-title, .hero-role, .hero-desc, .hero-actions, .hero-socials, .float-card",
+      )
+      .forEach((el) => {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        el.style.filter = "none";
+      });
+    return;
+  }
+
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
   tl.to(".navbar", { opacity: 1, y: 0, duration: 0.8 }, 0)
     .fromTo(
@@ -168,6 +257,10 @@ function revealHero() {
 
 /* Lenis smooth scroll */
 function initLenis() {
+  if (typeof Lenis === "undefined") {
+    console.warn("Lenis not loaded — using native scroll fallback.");
+    return createLenisFallback();
+  }
   const lenis = new Lenis({
     duration: 1.1,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -180,15 +273,32 @@ function initLenis() {
 /* Navbar: floating glass → "Dynamic Island" on scroll + active section indicator */
 function initNavbar(lenis) {
   const navbar = document.getElementById("navbar");
-  gsap.set(navbar, { opacity: 0, y: -16 });
+  const hasGsap = !!window.gsap;
+  const hasScrollTrigger = hasGsap && !!window.ScrollTrigger;
 
-  ScrollTrigger.create({
-    start: "top -80",
-    end: 99999,
-    onUpdate: (self) => {
-      navbar.classList.toggle("scrolled", self.scroll() > 80);
-    },
-  });
+  if (hasGsap) {
+    gsap.set(navbar, { opacity: 0, y: -16 });
+  } else if (navbar) {
+    navbar.style.opacity = "1";
+    navbar.style.transform = "none";
+  }
+
+  if (hasScrollTrigger) {
+    ScrollTrigger.create({
+      start: "top -80",
+      end: 99999,
+      onUpdate: (self) => {
+        navbar.classList.toggle("scrolled", self.scroll() > 80);
+      },
+    });
+  } else {
+    // Native-scroll fallback for the "scrolled" (compact) navbar state
+    window.addEventListener(
+      "scroll",
+      () => navbar.classList.toggle("scrolled", window.scrollY > 80),
+      { passive: true },
+    );
+  }
 
   const navLinks = document.querySelectorAll(".nav-link, .mobile-link");
   const sections = [...navLinks]
@@ -196,16 +306,30 @@ function initNavbar(lenis) {
     .filter(Boolean);
 
   const uniqueSections = [...new Set(sections)];
-  uniqueSections.forEach((section) => {
-    ScrollTrigger.create({
-      trigger: section,
-      start: "top 45%",
-      end: "bottom 45%",
-      onToggle: (self) => {
-        if (self.isActive) setActiveNav(section.id);
-      },
+
+  if (hasScrollTrigger) {
+    uniqueSections.forEach((section) => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 45%",
+        end: "bottom 45%",
+        onToggle: (self) => {
+          if (self.isActive) setActiveNav(section.id);
+        },
+      });
     });
-  });
+  } else if ("IntersectionObserver" in window) {
+    // Native-scroll fallback for the active-section nav indicator
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveNav(entry.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px" },
+    );
+    uniqueSections.forEach((section) => observer.observe(section));
+  }
 
   function setActiveNav(id) {
     document.querySelectorAll(".nav-link").forEach((l) => {
@@ -264,187 +388,180 @@ function initMobileMenu(lenis) {
 }
 
 function initScrollReveal() {
-  const M = window.Motion;
-  const motionReady =
-    M && typeof M.inView === "function" && typeof M.animate === "function";
-
-  if (!motionReady) {
+  if (!window.gsap || !window.ScrollTrigger) {
+    document
+      .querySelectorAll(
+        "[data-reveal], .project-card, .cert-card, .timeline-card, .timeline-dot, .marquee-wrap",
+      )
+      .forEach((el) => {
+        el.style.opacity = "";
+        el.style.transform = "";
+      });
     return;
   }
 
-  const { animate, inView, stagger } = M;
-  const EASE_IN = { type: "spring", stiffness: 140, damping: 20, mass: 0.7 };
-  const EASE_POP = { type: "spring", stiffness: 260, damping: 18 };
+  // Generic fade-up reveal
+  gsap.utils.toArray("[data-reveal]").forEach((el) => {
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 28 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 88%" },
+      },
+    );
+  });
 
-  function revealOnView(el, hiddenStyle, onEnter, options) {
-    if (!el) return;
-    Object.assign(el.style, hiddenStyle);
-    try {
-      inView(el, onEnter, options);
-    } catch (err) {
-      Object.assign(el.style, { opacity: "", transform: "" });
-      console.warn("Scroll reveal skipped for an element:", err);
-    }
-  }
-
-  try {
-    document.querySelectorAll("[data-reveal]").forEach((el) => {
-      revealOnView(
+  // Section eyebrows / titles that aren't tagged with data-reveal
+  gsap.utils
+    .toArray(
+      ".section .eyebrow, .section .section-title, .section .section-desc",
+    )
+    .forEach((el) => {
+      if (el.closest("[data-reveal]")) return;
+      gsap.fromTo(
         el,
-        { opacity: "0", transform: "translateY(28px)" },
-        () => animate(el, { opacity: [0, 1], y: [28, 0] }, EASE_IN),
-        { amount: 0.2 },
-      );
-    });
-  } catch (err) {
-    console.warn("Scroll reveal ([data-reveal]) failed:", err);
-  }
-
-  try {
-    document
-      .querySelectorAll(
-        ".section .eyebrow, .section .section-title, .section .section-desc",
-      )
-      .forEach((el) => {
-        if (el.closest("[data-reveal]")) return;
-        revealOnView(
-          el,
-          { opacity: "0" },
-          () => animate(el, { opacity: [0, 1], y: [24, 0] }, EASE_IN),
-          { amount: 0.3 },
-        );
-      });
-  } catch (err) {
-    console.warn("Scroll reveal (section titles) failed:", err);
-  }
-
-  try {
-    // Timeline cards
-    document.querySelectorAll(".timeline-row").forEach((row, i) => {
-      const fromX = i % 2 === 0 ? -40 : 40;
-      const card = row.querySelector(".timeline-card");
-      const dot = row.querySelector(".timeline-dot");
-      revealOnView(
-        card,
-        { opacity: "0" },
-        () =>
-          animate(
-            card,
-            { opacity: [0, 1], x: [fromX, 0], scale: [0.96, 1] },
-            EASE_IN,
-          ),
-        { amount: 0.4 },
-      );
-      revealOnView(
-        dot,
-        { transform: "scale(0)" },
-        () => animate(dot, { scale: [0, 1] }, EASE_POP),
-        { amount: 0.4 },
-      );
-    });
-  } catch (err) {
-    console.warn("Scroll reveal (timeline) failed:", err);
-  }
-
-  try {
-    // Project cards
-    const projectsGrid = document.getElementById("projectsGrid");
-    const projectCards = document.querySelectorAll(".project-card");
-    if (projectsGrid && projectCards.length) {
-      projectCards.forEach((el) => {
-        el.style.opacity = "0";
-      });
-      inView(
-        projectsGrid,
-        () => {
-          animate(
-            ".project-card",
-            { opacity: [0, 1], y: [40, 0] },
-            { ...EASE_IN, delay: stagger(0.12) },
-          );
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 90%" },
         },
-        { amount: 0.15 },
+      );
+    });
+
+  // Timeline cards (Education / Experience): alternating slide-in
+  gsap.utils.toArray(".timeline-row").forEach((row, i) => {
+    const fromX = i % 2 === 0 ? -40 : 40;
+    const card = row.querySelector(".timeline-card");
+    const dot = row.querySelector(".timeline-dot");
+    if (card) {
+      gsap.fromTo(
+        card,
+        { opacity: 0, x: fromX, scale: 0.96 },
+        {
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: row, start: "top 85%" },
+        },
       );
     }
-  } catch (err) {
-    console.warn("Scroll reveal (projects) failed:", err);
-    document.querySelectorAll(".project-card").forEach((el) => {
-      el.style.opacity = "";
-    });
-  }
-
-  try {
-    // Certificate & Award grids
-    ["certGridCertificate", "certGridAwards"].forEach((id) => {
-      const grid = document.getElementById(id);
-      if (!grid) return;
-      const cards = grid.querySelectorAll(".cert-card");
-      if (!cards.length) return;
-      cards.forEach((el) => {
-        el.style.opacity = "0";
-      });
-      try {
-        inView(
-          grid,
-          () => {
-            animate(
-              cards,
-              { opacity: [0, 1], y: [40, 0], scale: [0.95, 1] },
-              { ...EASE_IN, delay: stagger(0.1) },
-            );
-          },
-          { amount: 0.15 },
-        );
-      } catch (err) {
-        cards.forEach((el) => {
-          el.style.opacity = "";
-        });
-        throw err;
-      }
-    });
-  } catch (err) {
-    console.warn("Scroll reveal (certificates/awards) failed:", err);
-  }
-
-  try {
-    // Tech marquee rows fade in
-    document.querySelectorAll(".marquee-wrap").forEach((el) => {
-      revealOnView(
-        el,
-        { opacity: "0" },
-        () => animate(el, { opacity: [0, 1] }, { duration: 1 }),
-        { amount: 0.3 },
+    if (dot) {
+      gsap.fromTo(
+        dot,
+        { scale: 0 },
+        {
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(2)",
+          scrollTrigger: { trigger: row, start: "top 85%" },
+        },
       );
-    });
-  } catch (err) {
-    console.warn("Scroll reveal (marquee) failed:", err);
+    }
+  });
+
+  // Project cards stagger
+  if (document.getElementById("projectsGrid")) {
+    gsap.fromTo(
+      ".project-card",
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: "power3.out",
+        scrollTrigger: { trigger: "#projectsGrid", start: "top 85%" },
+      },
+    );
   }
+
+  // Certificate & Award grids, and Articles & Publications grids —
+  // four separate masonry grids, same stagger treatment for all.
+  [
+    "certGridCertificate",
+    "certGridAwards",
+    "articleGrid",
+    "publicationGrid",
+  ].forEach((id) => {
+    const grid = document.getElementById(id);
+    if (!grid || !grid.querySelector(".cert-card")) return;
+    gsap.fromTo(
+      grid.querySelectorAll(".cert-card"),
+      { opacity: 0, y: 40, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: grid, start: "top 85%" },
+      },
+    );
+  });
+
+  // Tech marquee rows fade in
+  gsap.utils.toArray(".marquee-wrap").forEach((el) => {
+    gsap.fromTo(
+      el,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: 1,
+        scrollTrigger: { trigger: el, start: "top 90%" },
+      },
+    );
+  });
 }
 
 /* Hero mouse parallax on floating cards */
 function initHeroParallax() {
   const wrap = document.getElementById("heroParallax");
-  if (!wrap) return;
+  if (!wrap || !window.gsap) return;
   const cards = wrap.querySelectorAll("[data-depth]");
   const isTouch = window.matchMedia("(pointer: coarse)").matches;
   if (isTouch) return;
 
-  wrap.addEventListener("mousemove", (e) => {
-    const rect = wrap.getBoundingClientRect();
-    const relX = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-    const relY = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+  let pendingX = 0;
+  let pendingY = 0;
+  let queued = false;
 
+  function applyParallax() {
+    queued = false;
     cards.forEach((card) => {
       const depth = parseFloat(card.dataset.depth || 0.3);
       gsap.to(card, {
-        x: relX * 22 * depth * -1,
-        y: relY * 22 * depth * -1,
+        x: pendingX * 22 * depth * -1,
+        y: pendingY * 22 * depth * -1,
         duration: 0.6,
         ease: "power2.out",
         overwrite: "auto",
       });
     });
-  });
+  }
+
+  wrap.addEventListener(
+    "mousemove",
+    (e) => {
+      const rect = wrap.getBoundingClientRect();
+      pendingX = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+      pendingY = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(applyParallax);
+      }
+    },
+    { passive: true },
+  );
 
   wrap.addEventListener("mouseleave", () => {
     cards.forEach((card) =>
@@ -627,6 +744,38 @@ function renderCertifications() {
   }
 }
 
+/* Articles & Publications */
+function renderArticlesPublications() {
+  const articleEl = document.getElementById("articleGrid");
+  const pubEl = document.getElementById("publicationGrid");
+  if (!articleEl && !pubEl) return;
+
+  const cardHtml = (item) => `
+    <div class="cert-card">
+      <div class="cert-media">
+        <img data-src="${item.image}" alt="${item.name}" loading="lazy" decoding="async" class="lazy-img">
+      </div>
+      <div class="cert-body">
+        <h3 class="cert-name">${item.name}</h3>
+        <p class="cert-meta">${item.issuer} · ${item.date}</p>
+        <a class="cert-view-btn" href="${item.url}" target="_blank" rel="noopener noreferrer">
+          Read More <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  `;
+
+  if (articleEl && typeof ARTICLES !== "undefined") {
+    articleEl.innerHTML = ARTICLES.map(cardHtml).join("");
+  }
+  if (pubEl && typeof PUBLICATIONS !== "undefined") {
+    pubEl.innerHTML = PUBLICATIONS.map(cardHtml).join("");
+  }
+  // Note: lucide.createIcons() is already called once for the whole page
+  // right after all render*() functions run (see DOMContentLoaded), so
+  // there's no need to call it again here.
+}
+
 /* Certificate modal */
 function initCertModal() {
   const modal = document.getElementById("certModal");
@@ -741,11 +890,13 @@ function initContactForm() {
     });
 
     if (!allValid) {
-      gsap.fromTo(
-        form,
-        { x: -6 },
-        { x: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" },
-      );
+      if (window.gsap) {
+        gsap.fromTo(
+          form,
+          { x: -6 },
+          { x: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" },
+        );
+      }
       return;
     }
 
@@ -767,11 +918,19 @@ function initBackToTop(lenis) {
   const btn = document.getElementById("backToTop");
   if (!btn) return;
 
-  ScrollTrigger.create({
-    start: "top -600",
-    end: 99999,
-    onUpdate: (self) => btn.classList.toggle("show", self.scroll() > 600),
-  });
+  if (window.gsap && window.ScrollTrigger) {
+    ScrollTrigger.create({
+      start: "top -600",
+      end: 99999,
+      onUpdate: (self) => btn.classList.toggle("show", self.scroll() > 600),
+    });
+  } else {
+    window.addEventListener(
+      "scroll",
+      () => btn.classList.toggle("show", window.scrollY > 600),
+      { passive: true },
+    );
+  }
 
   btn.addEventListener("click", () => {
     AutoScroll.stop();
@@ -781,21 +940,41 @@ function initBackToTop(lenis) {
 
 /* Magnetic buttons */
 function initMagnetic() {
+  if (!window.gsap) return;
   const isTouch = window.matchMedia("(pointer: coarse)").matches;
   if (isTouch) return;
 
   document.querySelectorAll(".magnetic").forEach((el) => {
-    el.addEventListener("mousemove", (e) => {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
+    // Same rAF-throttling rationale as the hero parallax above: only the
+    // latest pointer position matters, so we don't need to spin up a new
+    // GSAP tween on every raw mousemove event.
+    let pendingX = 0;
+    let pendingY = 0;
+    let queued = false;
+
+    function apply() {
+      queued = false;
       gsap.to(el, {
-        x: x * 0.25,
-        y: y * 0.4,
+        x: pendingX * 0.25,
+        y: pendingY * 0.4,
         duration: 0.4,
         ease: "power2.out",
       });
-    });
+    }
+
+    el.addEventListener(
+      "mousemove",
+      (e) => {
+        const rect = el.getBoundingClientRect();
+        pendingX = e.clientX - rect.left - rect.width / 2;
+        pendingY = e.clientY - rect.top - rect.height / 2;
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(apply);
+        }
+      },
+      { passive: true },
+    );
     el.addEventListener("mouseleave", () => {
       gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.4)" });
     });
@@ -803,7 +982,7 @@ function initMagnetic() {
 }
 
 /* Particle Background */
-function initParticles() {
+function initParticles(lenis) {
   const canvas = document.getElementById("particleCanvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -812,23 +991,71 @@ function initParticles() {
     "(prefers-reduced-motion: reduce)",
   ).matches;
   const isSmall = window.innerWidth < 640;
+  // Extra safety for lower-end machines: fewer logical CPU cores usually
+  // means less headroom for a continuous full-screen canvas animation.
+  const isLowEnd = (navigator.hardwareConcurrency || 8) <= 4;
   const LINE_RGB = "129,140,248"; // indigo — node-to-node links
   const NODE_RGB = "165,180,252"; // slightly lighter — the dots themselves
   const GLOW_RGB = "99,102,241"; // soft halo around each node
 
-  const COUNT = prefersReduced ? 0 : isSmall ? 34 : 70;
-  const LINK_DIST = isSmall ? 110 : 150;
+  const COUNT = prefersReduced ? 0 : isSmall ? 55 : isLowEnd ? 60 : 100;
+  const LINK_DIST = isSmall ? 130 : 160;
   const MOUSE_RADIUS = isSmall ? 130 : 180;
   const MOUSE_PUSH = 0.9;
+  // The background doesn't need full 60fps to read as smooth motion —
+  // capping it frees up a meaningful chunk of every second for scrolling,
+  // hover animations, and everything else competing for the main thread.
+  const TARGET_FPS = 30;
+  const FRAME_BUDGET = 1000 / TARGET_FPS;
 
   let width, height, dpr;
   let particles = [];
   let rafId = null;
   let running = true;
+  let lastFrameTime = 0;
   const mouse = { x: 0, y: 0, active: false };
 
+  // While the page is actively being scrolled, skip this decorative
+  // background's own work entirely so the frame budget goes to whatever
+  // scroll-triggered card animation is playing (GSAP/ScrollTrigger) — that
+  // one actually needs to look smooth; the particles can lose a few
+  // frames unnoticed since they're just ambient motion.
+  let isScrolling = false;
+  let scrollIdleTimer = null;
+  const markScrolling = () => {
+    isScrolling = true;
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = setTimeout(() => {
+      isScrolling = false;
+    }, 120);
+  };
+  if (lenis && typeof lenis.on === "function") {
+    lenis.on("scroll", markScrolling);
+  } else {
+    window.addEventListener("scroll", markScrolling, { passive: true });
+  }
+
+  // Pre-rendered glow sprite, reused for every particle via drawImage
+  // instead of calling ctx.createRadialGradient() (a genuinely expensive
+  // call) up to COUNT times on every single frame. One gradient is
+  // computed once here instead of thousands of times per second.
+  const GLOW_SPRITE_SIZE = 64;
+  const glowSprite = document.createElement("canvas");
+  glowSprite.width = GLOW_SPRITE_SIZE;
+  glowSprite.height = GLOW_SPRITE_SIZE;
+  const glowCtx = glowSprite.getContext("2d");
+  const r = GLOW_SPRITE_SIZE / 2;
+  const spriteGradient = glowCtx.createRadialGradient(r, r, 0, r, r, r);
+  spriteGradient.addColorStop(0, `rgba(${GLOW_RGB}, 0.25)`);
+  spriteGradient.addColorStop(1, `rgba(${GLOW_RGB}, 0)`);
+  glowCtx.fillStyle = spriteGradient;
+  glowCtx.fillRect(0, 0, GLOW_SPRITE_SIZE, GLOW_SPRITE_SIZE);
+
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Cap the pixel ratio a bit more conservatively than 2x: on a 1440p+
+    // retina display, dpr=2 means 4x the pixels to clear/paint every
+    // frame versus dpr=1 for a purely decorative background layer.
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = canvas.offsetWidth = window.innerWidth;
     height = canvas.offsetHeight = window.innerHeight;
     canvas.width = width * dpr;
@@ -852,34 +1079,91 @@ function initParticles() {
     particles = Array.from({ length: COUNT }, makeParticle);
   }
 
-  function drawNode(p) {
-    // soft halo
-    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 5);
-    glow.addColorStop(0, `rgba(${GLOW_RGB}, ${p.opacity * 0.25})`);
-    glow.addColorStop(1, `rgba(${GLOW_RGB}, 0)`);
-    ctx.beginPath();
-    ctx.fillStyle = glow;
-    ctx.arc(p.x, p.y, p.radius * 5, 0, Math.PI * 2);
-    ctx.fill();
+  function drawNodes() {
+    // Halos first (cheap drawImage blits from the pre-rendered sprite)
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const size = p.radius * 10;
+      ctx.globalAlpha = p.opacity;
+      ctx.drawImage(glowSprite, p.x - size / 2, p.y - size / 2, size, size);
+    }
+    ctx.globalAlpha = 1;
 
-    // core dot
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(${NODE_RGB}, ${p.opacity})`;
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fill();
+    // Core dots: batched into a few opacity "tiers" (same idea as the
+    // link tiers below) so each particle keeps its original varied
+    // opacity look, while still needing only a handful of fill() calls
+    // per frame instead of one per particle.
+    const DOT_TIERS = 3;
+    const tierPaths = Array.from({ length: DOT_TIERS }, () => new Path2D());
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      // opacity ranges 0.5–0.9 (see makeParticle) → map to tier 0..2
+      const tier = Math.min(
+        DOT_TIERS - 1,
+        Math.floor(((p.opacity - 0.5) / 0.4) * DOT_TIERS),
+      );
+      tierPaths[tier].moveTo(p.x + p.radius, p.y);
+      tierPaths[tier].arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    }
+    for (let t = 0; t < DOT_TIERS; t++) {
+      const alpha = 0.5 + (t / (DOT_TIERS - 1)) * 0.4;
+      ctx.fillStyle = `rgba(${NODE_RGB}, ${alpha})`;
+      ctx.fill(tierPaths[t]);
+    }
   }
 
-  function drawLine(x1, y1, x2, y2, alpha) {
-    ctx.beginPath();
-    ctx.strokeStyle = `rgba(${LINE_RGB}, ${alpha})`;
+  // Links are batched into a handful of alpha "tiers" and drawn with a
+  // single stroke() call per tier, instead of one stroke() call per pair
+  // of nearby particles (which, with dozens of particles, can otherwise
+  // mean hundreds of individual canvas draw calls every frame).
+  const LINK_TIERS = 4;
+  function drawLinks() {
+    const tierPaths = Array.from({ length: LINK_TIERS }, () => new Path2D());
+
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < LINK_DIST) {
+          const strength = 1 - dist / LINK_DIST;
+          const tier = Math.min(
+            LINK_TIERS - 1,
+            Math.floor(strength * LINK_TIERS),
+          );
+          tierPaths[tier].moveTo(a.x, a.y);
+          tierPaths[tier].lineTo(b.x, b.y);
+        }
+      }
+    }
+
     ctx.lineWidth = 1;
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
+    for (let t = 0; t < LINK_TIERS; t++) {
+      const alpha = ((t + 1) / LINK_TIERS) * 0.35;
+      ctx.strokeStyle = `rgba(${LINE_RGB}, ${alpha})`;
+      ctx.stroke(tierPaths[t]);
+    }
+
+    if (mouse.active) {
+      const cursorPath = new Path2D();
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const dist = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+        if (dist < MOUSE_RADIUS) {
+          cursorPath.moveTo(p.x, p.y);
+          cursorPath.lineTo(mouse.x, mouse.y);
+        }
+      }
+      ctx.strokeStyle = `rgba(${LINE_RGB}, 0.45)`;
+      ctx.stroke(cursorPath);
+    }
   }
 
   function step() {
-    particles.forEach((p) => {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
 
@@ -903,54 +1187,25 @@ function initParticles() {
           p.y += (dy / dist) * force;
         }
       }
-    });
+    }
   }
 
   function draw() {
     ctx.clearRect(0, 0, width, height);
-
-    // node-to-node links
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < LINK_DIST) {
-          drawLine(
-            particles[i].x,
-            particles[i].y,
-            particles[j].x,
-            particles[j].y,
-            (1 - dist / LINK_DIST) * 0.35,
-          );
-        }
-      }
-    }
-
-    // cursor-to-node links
-    if (mouse.active) {
-      particles.forEach((p) => {
-        const dist = Math.hypot(p.x - mouse.x, p.y - mouse.y);
-        if (dist < MOUSE_RADIUS) {
-          drawLine(
-            p.x,
-            p.y,
-            mouse.x,
-            mouse.y,
-            (1 - dist / MOUSE_RADIUS) * 0.55,
-          );
-        }
-      });
-    }
-
-    particles.forEach(drawNode);
+    drawLinks();
+    drawNodes();
   }
 
-  function tick() {
+  function tick(now) {
     if (!running) return;
+    rafId = requestAnimationFrame(tick);
+    // Frame-rate cap: skip work entirely on frames that come in faster
+    // than our target, instead of redrawing on every display refresh.
+    if (now - lastFrameTime < FRAME_BUDGET) return;
+    if (isScrolling) return; // give the frame budget to scroll animations instead
+    lastFrameTime = now;
     step();
     draw();
-    rafId = requestAnimationFrame(tick);
   }
 
   if (COUNT === 0) return; // reduced motion — skip animation entirely
@@ -966,17 +1221,28 @@ function initParticles() {
     else cancelAnimationFrame(rafId);
   });
 
-  // Cursor interaction
-  window.addEventListener("pointermove", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    mouse.active = true;
-  });
-  window.addEventListener("pointerdown", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    mouse.active = true;
-  });
+  // Cursor interaction — coordinates are just recorded here; the actual
+  // per-particle math happens once per animation frame in step(), not
+  // once per pointermove event (which can fire far more often than 60Hz
+  // on some mice/trackpads).
+  window.addEventListener(
+    "pointermove",
+    (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+    },
+    { passive: true },
+  );
+  window.addEventListener(
+    "pointerdown",
+    (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+    },
+    { passive: true },
+  );
   document.addEventListener("mouseleave", () => {
     mouse.active = false;
   });
@@ -1093,8 +1359,14 @@ function initExploreAutoScroll(lenis) {
 
 /* ---  Motion --- */
 function initMotionInteractions() {
-  if (!window.Motion) return;
-  const { animate, hover, press, inView } = window.Motion;
+  if (!window.Motion) {
+    // Motion (motion.dev) failed to load — the buttons/chips below simply
+    // won't get the extra spring lift, but nothing breaks. Cards use a
+    // plain CSS transition regardless (see style.css), so they're
+    // unaffected either way.
+    return;
+  }
+  const { animate, hover, press } = window.Motion;
   const SPRING_IN = { type: "spring", stiffness: 380, damping: 18 };
   const SPRING_OUT = { type: "spring", stiffness: 380, damping: 22 };
   const SPRING_PRESS = { type: "spring", stiffness: 500, damping: 22 };
@@ -1120,19 +1392,14 @@ function initMotionInteractions() {
     return () => animate(el, { scale: 1 }, SPRING_OUT);
   });
 
-  // Project & cert cards: soft spring lift instead of a flat CSS ease
-  hover(".project-card, .cert-card", (el) => {
-    animate(el, { y: -8 }, { type: "spring", stiffness: 260, damping: 20 });
-    return () =>
-      animate(el, { y: 0 }, { type: "spring", stiffness: 260, damping: 24 });
-  });
-
-  // Timeline cards: gentle spring lift on hover too
-  hover(".timeline-card", (el) => {
-    animate(el, { y: -4 }, { type: "spring", stiffness: 300, damping: 22 });
-    return () =>
-      animate(el, { y: 0 }, { type: "spring", stiffness: 300, damping: 24 });
-  });
+  // NOTE: Project/cert/timeline card hover lift is intentionally handled
+  // by a pure CSS transition (see .project-card / .cert-card /
+  // .timeline-card in style.css) using a proper ease-in-out curve, not
+  // Motion. A physics spring over such a short 4-8px distance settles in
+  // ~150ms with no visible ease-in ramp, which reads as an abrupt/stiff
+  // snap rather than a smooth hover — and doubling it up with a CSS
+  // transition on the same property fights the spring and makes it worse.
+  // CSS-only keeps it simple, smooth, and immune to any CDN/library issue.
 
   // Back-to-top button: a satisfying press
   press(".back-to-top", (el) => {
@@ -1141,14 +1408,24 @@ function initMotionInteractions() {
   });
 }
 
-/* --- Caching — Service Worker registration --- */
+/* --- No Service Worker ---
+   This portfolio doesn't use one anymore: for a site this light, the
+   caching layer was adding more complexity (and more ways to get stuck
+   serving stale files) than it was worth. This function actively removes
+   any Service Worker + cache left behind by earlier versions of this
+   site (on any host, not just localhost) so returning visitors don't get
+   stuck on old cached files forever. Safe to keep permanently — once
+   there's nothing left to clean up, this is effectively a no-op. */
 function initServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  if (location.protocol !== "http:" && location.protocol !== "https:") return; // file:// can't register SWs
-
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js")
-      .catch((err) => console.warn("Service worker registration failed:", err));
-  });
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((regs) => regs.forEach((reg) => reg.unregister()))
+    .catch(() => {});
+  if (window.caches) {
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .catch(() => {});
+  }
 }

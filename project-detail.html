@@ -111,7 +111,8 @@
           "https://github.com/Adty19",
           "https://www.linkedin.com/in/adty/",
           "https://ctftime.org/team/408539",
-          "https://ctf.hackthebox.com/user/profile/1071299"
+          "https://ctf.hackthebox.com/user/profile/1071299",
+          "https://medium.com/@adtyyyy"
         ]
       }
     </script>
@@ -124,49 +125,42 @@
       rel="stylesheet"
     />
 
-    <!-- Tailwind (CDN / Play) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              bg: {
-                primary: "#09090B",
-                secondary: "#0F172A",
-                tertiary: "#111827",
-              },
-              accent: {
-                blue: "#3B82F6",
-                indigo: "#6366F1",
-                violet: "#8B5CF6",
-                cyan: "#06B6D4",
-              },
-            },
-            fontFamily: {
-              display: ['"Plus Jakarta Sans"', "sans-serif"],
-              body: ["Inter", "sans-serif"],
-              mono: ['"JetBrains Mono"', "monospace"],
-            },
-          },
-        },
-      };
-    </script>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="assets/css/tailwind.css" />
 
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script
+      src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"
+      defer
+    ></script>
 
     <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+      defer
+    ></script>
 
     <!-- Lenis smooth scroll -->
-    <script src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"></script>
+    <script
+      src="https://unpkg.com/lenis@1.1.9/dist/lenis.min.js"
+      defer
+    ></script>
 
-    <!-- Motion (motion.dev — Framer Motion's engine) for spring-physics micro-interactions -->
-    <script src="https://cdn.jsdelivr.net/npm/motion@11.13.5/dist/motion.js"></script>
+    <!-- Motion -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/motion@11.13.5/dist/motion.js"
+      defer
+    ></script>
 
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/landing-page.css" />
     <link rel="stylesheet" href="assets/css/project-detail.css" />
   </head>
 
@@ -369,6 +363,7 @@
         <div class="footer-links">
           <h4>Navigation</h4>
           <a href="index.html#about">About</a>
+          <a href="index.html#education">Education</a>
           <a href="index.html#projects">Projects</a>
           <a href="index.html#experience">Experience</a>
           <a href="index.html#contact">Contact</a>

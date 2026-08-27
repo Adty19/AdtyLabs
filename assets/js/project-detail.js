@@ -628,13 +628,20 @@ function debounce(fn, delay) {
   };
 }
 
-/* --- Caching via Service Worker --- */
+/* --- No Service Worker ---
+   Same rationale as main.js: this site doesn't use one. This actively
+   unregisters/cleans up anything left behind by earlier versions so
+   returning visitors don't get stuck on old cached files. */
 function initServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  if (location.protocol !== "http:" && location.protocol !== "https:") return;
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js")
-      .catch((err) => console.warn("Service worker registration failed:", err));
-  });
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((regs) => regs.forEach((reg) => reg.unregister()))
+    .catch(() => {});
+  if (window.caches) {
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .catch(() => {});
+  }
 }
