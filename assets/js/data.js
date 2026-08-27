@@ -54,8 +54,8 @@ const EXPERIENCE = [
     desc: "Conducted web and Android penetration testing engagements to identify security vulnerabilities across applications and systems. Performed vulnerability assessments, exploitation, post-exploitation analysis, and technical reporting while providing practical remediation recommendations to strengthen application security and reduce security risks.",
   },
   {
-    logo: "SE",
-    company: "Self-Employed",
+    logo: "AL",
+    company: "AdtyLabs",
     role: "Web Developer & Pentester",
     duration: "Jan 2020 — April 2026",
     location: "Remote · Lampung, Indonesia",
