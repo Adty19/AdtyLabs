@@ -264,7 +264,7 @@ const PROJECTS = [
     title: "Writeup | Meta4Sec x Redlimit CTF 2026",
     desc: "Selected writeups from the Meta4Sec x Redlimit Capture The Flag (CTF) competition, where I competed independently as a solo player, solved 20 of 24 challenges, and finished 25th overall. The challenges covered multiple cybersecurity domains, including web security, Ics/OT, OSINT, Misc, cryptography, reverse engineering, forensics, and other offensive security techniques. This project documents selected solutions, methodologies, exploitation techniques, and problem-solving approaches from the competition.",
     stack: [
-      "Web",
+      "Web Exploitation",
       "Cryptography",
       "Pwn",
       "OSINT",
@@ -306,7 +306,7 @@ const PROJECTS = [
       "Forensics",
       "Hardware",
       "Reverse Engineering",
-      "Web",
+      "Web Exploitation",
       "Misc",
       "SDR",
     ],
@@ -456,6 +456,18 @@ const TECH_ICON_MAP = {
   "Secure Coding": {
     icon: "shield-check",
     desc: "Identifying & fixing insecure code patterns.",
+  },
+  SDR: {
+    icon: "radio",
+    desc: "Software Defined Radio challenges involving wireless signals, RF analysis, and digital communications.",
+  },
+  AI: {
+    icon: "brain",
+    desc: "Artificial Intelligence challenges involving machine learning, models, data, and AI-based systems.",
+  },
+  MISC: {
+    icon: "puzzle",
+    desc: "Miscellaneous challenges covering unconventional problems that don't fit into other CTF categories.",
   },
 };
 
