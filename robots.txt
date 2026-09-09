@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adtylabs.vercel.app/sitemap.xml
