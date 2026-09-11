@@ -1,0 +1,16 @@
+{
+  "name": "adtylabs-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "My Personal Portfolio Website",
+  "scripts": {
+    "prerender": "node scripts/prerender.js",
+    "minify": "terser assets/js/main.js -c -m -o assets/js/main.min.js --comments false && terser assets/js/project-detail.js -c -m -o assets/js/project-detail.min.js --comments false",
+    "build-css": "node scripts/build-css.js",
+    "build": "npm run build-css && npm run minify && npm run prerender"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "terser": "^5.36.0"
+  }
+}
