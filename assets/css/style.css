@@ -368,6 +368,7 @@ textarea:focus-visible {
   font-size: 1.02rem;
   line-height: 1.75;
   max-width: 52ch;
+  text-align: justify;
 }
 .gradient-text {
   background: linear-gradient(

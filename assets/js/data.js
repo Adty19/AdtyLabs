@@ -46,11 +46,19 @@ const EDUCATION = [
 
 const EXPERIENCE = [
   {
+    logo: "PGW",
+    company: "PT Punggawa Siber Solusi",
+    role: "Enterprise Cyber Academy",
+    duration: "September 2026",
+    location: "Remote · Central Jakarta, Indonesia",
+    desc: "Completed hands-on cybersecurity training covering Cybersecurity Foundation, Web Application Penetration Testing, Social Engineering, Advanced Web Pentesting, and Capture The Flag (CTF). Conducted vulnerability identification and exploitation in controlled environments, documented technical findings and remediation recommendations, and performed vulnerability severity assessment using CVSS v3.1. Developed structured penetration testing reports based on practical security assessment and CTF exercises.",
+  },
+  {
     logo: "HTR",
     company: "PT Hacktrace Siber Indonesia",
     role: "Red Team",
     duration: "May 2026 — June 2026",
-    location: "Remote · Jakarta, Indonesia",
+    location: "Remote · South Jakarta, Indonesia",
     desc: "Conducted web and Android penetration testing engagements to identify security vulnerabilities across applications and systems. Performed vulnerability assessments, exploitation, post-exploitation analysis, and technical reporting while providing practical remediation recommendations to strengthen application security and reduce security risks.",
   },
   {
@@ -58,7 +66,7 @@ const EXPERIENCE = [
     company: "AdtyLabs",
     role: "Web Developer & Pentester",
     duration: "Jan 2020 — April 2026",
-    location: "Remote · Lampung, Indonesia",
+    location: "Remote · Bandar Lampung, Indonesia",
     desc: "Developed secure and scalable web applications using Laravel, PHP, JavaScript, and Tailwind CSS while conducting web and Android penetration testing engagements. Performed reconnaissance, vulnerability assessment, exploitation, post-exploitation analysis, and technical reporting to identify security weaknesses and improve application resilience.",
   },
   {
@@ -545,7 +553,16 @@ const CERTIFICATIONS = [
     type: "certificate",
   },
   {
-    image: "assets/images/certificate/htb.jpg",
+    image: "assets/images/certificate/Certificate_Punggawa.png",
+    width: 873,
+    height: 616,
+    name: "Enterprise Cyber Academy",
+    issuer: "PT Punggawa Siber Solusi",
+    date: "September 2026",
+    type: "certificate",
+  },
+  {
+    image: "assets/images/certificate/Certificate_CTF_HTB_2026.png",
     width: 554,
     height: 554,
     name: "483rd Place — Hack The Box Cyber Apocalypse CTF 2026: The Salt Crown",
@@ -619,7 +636,7 @@ const ARTICLES = [
     image: "https://placehold.co/600x400/111827/3b82f6?text=Article",
     width: 600,
     height: 400,
-    name: "Analyzing Android malware disguised as a digital wedding invitation",
+    name: "Analyzing Android Malware Disguised As a Digital Wedding Invitation",
     issuer: "Medium",
     date: "August 2026",
     url: "https://medium.com/@adtyyyy/analyzing-android-malware-disguised-as-a-digital-wedding-invitation-4bd9c9cab79d",
