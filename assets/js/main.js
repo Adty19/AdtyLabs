@@ -38,13 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* --- Loader (self-guards if GSAP failed to load) --- */
+  /* --- Loader  --- */
   safeInit(runLoader, loaderFailsafe);
 
-  /* --- Lenis smooth scroll (falls back to native scroll if missing) --- */
+  /* --- Lenis smooth scroll  --- */
   const lenis = safeInit(initLenis) || createLenisFallback();
 
-  /* --- GSAP + ScrollTrigger setup (optional enhancement) --- */
+  /* --- GSAP + ScrollTrigger setup --- */
   if (window.gsap && window.ScrollTrigger) {
     safeInit(() => {
       gsap.registerPlugin(ScrollTrigger);
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* --- Interactions: each isolated so one failure can't block another --- */
+  /* --- Interactions --- */
   safeInit(initNavbar, lenis);
   safeInit(initMobileMenu, lenis);
   safeInit(initScrollReveal);
@@ -181,19 +181,17 @@ function runLoader(failsafeTimer) {
   try {
     const tl = gsap.timeline({ onComplete: finish });
 
-    // NOTE: these durations are purely cosmetic (no real asset loading is
-    // being tracked), so they were tuned down from the original 1.4s/0.5s/0.6s
-    // sequence. That original timing forced ~2.5s before the hero content
-    // (an LCP candidate) could render, which is the single biggest
-    // contributor to the "render delay" flagged by Lighthouse. Same visual
-    // sequence, just snappier.
     tl.to(fill, { width: "100%", duration: 0.6, ease: "power2.inOut" })
       .to(
         ".loader-inner",
         { opacity: 0, scale: 0.92, duration: 0.3, ease: "power2.in" },
         "+=0.05",
       )
-      .to(loader, { opacity: 0, duration: 0.35, ease: "power2.inOut" }, "-=0.1");
+      .to(
+        loader,
+        { opacity: 0, duration: 0.35, ease: "power2.inOut" },
+        "-=0.1",
+      );
   } catch (err) {
     console.warn("Loader animation failed, revealing page immediately:", err);
     finish();
@@ -202,7 +200,6 @@ function runLoader(failsafeTimer) {
 
 function revealHero() {
   if (!window.gsap) {
-    // No GSAP available — just make everything visible, no animation.
     document
       .querySelectorAll(
         ".navbar, .hero-eyebrow, .hero-title, .hero-role, .hero-desc, .hero-actions, .hero-socials, .float-card",
@@ -276,7 +273,7 @@ function initLenis() {
   return lenis;
 }
 
-/* Navbar: floating glass → "Dynamic Island" on scroll + active section indicator */
+/* Navbar */
 function initNavbar(lenis) {
   const navbar = document.getElementById("navbar");
   const hasGsap = !!window.gsap;
@@ -298,7 +295,6 @@ function initNavbar(lenis) {
       },
     });
   } else {
-    // Native-scroll fallback for the "scrolled" (compact) navbar state
     window.addEventListener(
       "scroll",
       () => navbar.classList.toggle("scrolled", window.scrollY > 80),
@@ -325,7 +321,6 @@ function initNavbar(lenis) {
       });
     });
   } else if ("IntersectionObserver" in window) {
-    // Native-scroll fallback for the active-section nav indicator
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -421,7 +416,7 @@ function initScrollReveal() {
     );
   });
 
-  // Section eyebrows / titles that aren't tagged with data-reveal
+  // Section eyebrows
   gsap.utils
     .toArray(
       ".section .eyebrow, .section .section-title, .section .section-desc",
@@ -441,7 +436,7 @@ function initScrollReveal() {
       );
     });
 
-  // Timeline cards (Education / Experience): alternating slide-in
+  // Timeline cards (Education / Experience)
   gsap.utils.toArray(".timeline-row").forEach((row, i) => {
     const fromX = i % 2 === 0 ? -40 : 40;
     const card = row.querySelector(".timeline-card");
@@ -490,8 +485,7 @@ function initScrollReveal() {
     );
   }
 
-  // Certificate & Award grids, and Articles & Publications grids —
-  // four separate masonry grids, same stagger treatment for all.
+  // Certificate & Award grids
   [
     "certGridCertificate",
     "certGridAwards",
@@ -715,12 +709,7 @@ function renderProjects() {
   ).join("");
 }
 
-/* Certificate & Awards masonry — split by type into two stacked grids */
-/* Certifications, Articles & Publications images: emit explicit
-   width/height attributes when the data has them, so the browser can
-   reserve the correct box before the lazy image loads (prevents layout
-   shift) without altering how the image is displayed. Falls back to no
-   attributes (today's behavior) when a size isn't known yet. */
+/* Certificate & Awards */
 function imgSizeAttrs(item) {
   return item.width && item.height
     ? ` width="${item.width}" height="${item.height}"`
@@ -735,13 +724,13 @@ function renderCertifications() {
   const cardHtml = (c, i) => `
     <div class="cert-card">
       <div class="cert-media">
-        <img data-src="${c.image}" alt="Sertifikat ${c.name}" loading="lazy" decoding="async" class="lazy-img"${imgSizeAttrs(c)}>
+        <img data-src="${c.image}" alt="Certificate ${c.name}" loading="lazy" decoding="async" class="lazy-img"${imgSizeAttrs(c)}>
       </div>
       <div class="cert-body">
         <h3 class="cert-name">${c.name}</h3>
         <p class="cert-meta">${c.issuer} · ${c.date}</p>
         <button class="cert-view-btn" data-cert-index="${i}">
-          View Certificate <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+          View <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </div>
@@ -788,9 +777,6 @@ function renderArticlesPublications() {
   if (pubEl && typeof PUBLICATIONS !== "undefined") {
     pubEl.innerHTML = PUBLICATIONS.map(cardHtml).join("");
   }
-  // Note: lucide.createIcons() is already called once for the whole page
-  // right after all render*() functions run (see DOMContentLoaded), so
-  // there's no need to call it again here.
 }
 
 /* Certificate modal */
@@ -808,7 +794,7 @@ function initCertModal() {
     const cert = CERTIFICATIONS[Number(btn.dataset.certIndex)];
     if (!cert) return;
     img.src = cert.image;
-    img.alt = `Sertifikat ${cert.name}`;
+    img.alt = `Certificate ${cert.name}`;
     if (cert.width && cert.height) {
       img.width = cert.width;
       img.height = cert.height;
@@ -847,7 +833,7 @@ function initCertModal() {
   });
 }
 
-/* Stat counters — animated with Motion (inView + numeric animate) */
+/* Stat counters */
 function initCounters() {
   if (!window.Motion) {
     document.querySelectorAll("[data-counter]").forEach((el) => {
@@ -924,7 +910,6 @@ function initContactForm() {
       return;
     }
 
-    // No backend wired up — simulate a send so the UI flow is complete end to end.
     submitLabel.textContent = "Sending...";
     setTimeout(() => {
       submitLabel.textContent = "Send Message";
@@ -969,9 +954,6 @@ function initMagnetic() {
   if (isTouch) return;
 
   document.querySelectorAll(".magnetic").forEach((el) => {
-    // Same rAF-throttling rationale as the hero parallax above: only the
-    // latest pointer position matters, so we don't need to spin up a new
-    // GSAP tween on every raw mousemove event.
     let pendingX = 0;
     let pendingY = 0;
     let queued = false;
@@ -1015,20 +997,15 @@ function initParticles(lenis) {
     "(prefers-reduced-motion: reduce)",
   ).matches;
   const isSmall = window.innerWidth < 640;
-  // Extra safety for lower-end machines: fewer logical CPU cores usually
-  // means less headroom for a continuous full-screen canvas animation.
   const isLowEnd = (navigator.hardwareConcurrency || 8) <= 4;
-  const LINE_RGB = "129,140,248"; // indigo — node-to-node links
-  const NODE_RGB = "165,180,252"; // slightly lighter — the dots themselves
-  const GLOW_RGB = "99,102,241"; // soft halo around each node
+  const LINE_RGB = "129,140,248";
+  const NODE_RGB = "165,180,252";
+  const GLOW_RGB = "99,102,241";
 
   const COUNT = prefersReduced ? 0 : isSmall ? 55 : isLowEnd ? 60 : 100;
   const LINK_DIST = isSmall ? 130 : 160;
   const MOUSE_RADIUS = isSmall ? 130 : 180;
   const MOUSE_PUSH = 0.9;
-  // The background doesn't need full 60fps to read as smooth motion —
-  // capping it frees up a meaningful chunk of every second for scrolling,
-  // hover animations, and everything else competing for the main thread.
   const TARGET_FPS = 30;
   const FRAME_BUDGET = 1000 / TARGET_FPS;
 
@@ -1039,11 +1016,6 @@ function initParticles(lenis) {
   let lastFrameTime = 0;
   const mouse = { x: 0, y: 0, active: false };
 
-  // While the page is actively being scrolled, skip this decorative
-  // background's own work entirely so the frame budget goes to whatever
-  // scroll-triggered card animation is playing (GSAP/ScrollTrigger) — that
-  // one actually needs to look smooth; the particles can lose a few
-  // frames unnoticed since they're just ambient motion.
   let isScrolling = false;
   let scrollIdleTimer = null;
   const markScrolling = () => {
@@ -1059,10 +1031,6 @@ function initParticles(lenis) {
     window.addEventListener("scroll", markScrolling, { passive: true });
   }
 
-  // Pre-rendered glow sprite, reused for every particle via drawImage
-  // instead of calling ctx.createRadialGradient() (a genuinely expensive
-  // call) up to COUNT times on every single frame. One gradient is
-  // computed once here instead of thousands of times per second.
   const GLOW_SPRITE_SIZE = 64;
   const glowSprite = document.createElement("canvas");
   glowSprite.width = GLOW_SPRITE_SIZE;
@@ -1076,9 +1044,6 @@ function initParticles(lenis) {
   glowCtx.fillRect(0, 0, GLOW_SPRITE_SIZE, GLOW_SPRITE_SIZE);
 
   function resize() {
-    // Cap the pixel ratio a bit more conservatively than 2x: on a 1440p+
-    // retina display, dpr=2 means 4x the pixels to clear/paint every
-    // frame versus dpr=1 for a purely decorative background layer.
     dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = canvas.offsetWidth = window.innerWidth;
     height = canvas.offsetHeight = window.innerHeight;
@@ -1104,7 +1069,6 @@ function initParticles(lenis) {
   }
 
   function drawNodes() {
-    // Halos first (cheap drawImage blits from the pre-rendered sprite)
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       const size = p.radius * 10;
@@ -1113,10 +1077,6 @@ function initParticles(lenis) {
     }
     ctx.globalAlpha = 1;
 
-    // Core dots: batched into a few opacity "tiers" (same idea as the
-    // link tiers below) so each particle keeps its original varied
-    // opacity look, while still needing only a handful of fill() calls
-    // per frame instead of one per particle.
     const DOT_TIERS = 3;
     const tierPaths = Array.from({ length: DOT_TIERS }, () => new Path2D());
     for (let i = 0; i < particles.length; i++) {
@@ -1136,10 +1096,6 @@ function initParticles(lenis) {
     }
   }
 
-  // Links are batched into a handful of alpha "tiers" and drawn with a
-  // single stroke() call per tier, instead of one stroke() call per pair
-  // of nearby particles (which, with dozens of particles, can otherwise
-  // mean hundreds of individual canvas draw calls every frame).
   const LINK_TIERS = 4;
   function drawLinks() {
     const tierPaths = Array.from({ length: LINK_TIERS }, () => new Path2D());
@@ -1283,15 +1239,7 @@ function debounce(fn, delay) {
   };
 }
 
-/* ---
-   Lazy image loading — real payload deferral for dynamically rendered
-   project/certificate images (mostly hotlinked from Unsplash), not just the
-   native `loading="lazy"` attribute. Images are rendered with `data-src`
-   and no `src`; an IntersectionObserver swaps the real URL in once the
-   image is ~300px from entering the viewport, then fades it in.
-   Falls back to loading everything immediately if IntersectionObserver
-   isn't available.
-   --- */
+/* Lazy image loading  */
 function initLazyImages() {
   const images = document.querySelectorAll("img.lazy-img[data-src]");
   if (!images.length) return;
@@ -1303,8 +1251,8 @@ function initLazyImages() {
     img.removeAttribute("data-src");
     const reveal = () => img.classList.add("lazy-loaded");
     img.addEventListener("load", reveal, { once: true });
-    img.addEventListener("error", reveal, { once: true }); // broken link shouldn't stay invisible
-    setTimeout(reveal, 6000); // last-resort safety net if neither event ever fires
+    img.addEventListener("error", reveal, { once: true });
+    setTimeout(reveal, 6000);
   };
 
   if (!("IntersectionObserver" in window)) {
@@ -1375,7 +1323,6 @@ function initExploreAutoScroll(lenis) {
     playStep(0);
   });
 
-  // Any deliberate manual scroll input cancels the guided tour immediately
   ["wheel", "touchstart"].forEach((evt) => {
     window.addEventListener(evt, () => stopTour(), { passive: true });
   });
@@ -1384,10 +1331,6 @@ function initExploreAutoScroll(lenis) {
 /* ---  Motion --- */
 function initMotionInteractions() {
   if (!window.Motion) {
-    // Motion (motion.dev) failed to load — the buttons/chips below simply
-    // won't get the extra spring lift, but nothing breaks. Cards use a
-    // plain CSS transition regardless (see style.css), so they're
-    // unaffected either way.
     return;
   }
   const { animate, hover, press } = window.Motion;
@@ -1395,7 +1338,6 @@ function initMotionInteractions() {
   const SPRING_OUT = { type: "spring", stiffness: 380, damping: 22 };
   const SPRING_PRESS = { type: "spring", stiffness: 500, damping: 22 };
 
-  // Small chips / icons: gentle pop + lift on hover (non-magnetic elements only)
   hover(
     ".social-icon, .pill, .skill-tag, .marquee-item, .cert-view-btn",
     (el) => {
@@ -1404,26 +1346,15 @@ function initMotionInteractions() {
     },
   );
 
-  // Nav links: subtle lift on hover
   hover(".nav-link", (el) => {
     animate(el, { y: -2 }, SPRING_IN);
     return () => animate(el, { y: 0 }, SPRING_OUT);
   });
 
-  // Tap/click feedback on non-magnetic action buttons
   press(".project-btn, .cert-view-btn, .social-icon", (el) => {
     animate(el, { scale: 0.92 }, SPRING_PRESS);
     return () => animate(el, { scale: 1 }, SPRING_OUT);
   });
-
-  // NOTE: Project/cert/timeline card hover lift is intentionally handled
-  // by a pure CSS transition (see .project-card / .cert-card /
-  // .timeline-card in style.css) using a proper ease-in-out curve, not
-  // Motion. A physics spring over such a short 4-8px distance settles in
-  // ~150ms with no visible ease-in ramp, which reads as an abrupt/stiff
-  // snap rather than a smooth hover — and doubling it up with a CSS
-  // transition on the same property fights the spring and makes it worse.
-  // CSS-only keeps it simple, smooth, and immune to any CDN/library issue.
 
   // Back-to-top button: a satisfying press
   press(".back-to-top", (el) => {
@@ -1432,14 +1363,6 @@ function initMotionInteractions() {
   });
 }
 
-/* --- No Service Worker ---
-   This portfolio doesn't use one anymore: for a site this light, the
-   caching layer was adding more complexity (and more ways to get stuck
-   serving stale files) than it was worth. This function actively removes
-   any Service Worker + cache left behind by earlier versions of this
-   site (on any host, not just localhost) so returning visitors don't get
-   stuck on old cached files forever. Safe to keep permanently — once
-   there's nothing left to clean up, this is effectively a no-op. */
 function initServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   navigator.serviceWorker
