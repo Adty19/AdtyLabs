@@ -261,6 +261,7 @@ const PROJECTS = [
     screenshots: [
       "assets/images/projects/Loading.jpg",
       "assets/images/projects/ComingSoon.jpg",
+      "assets/images/projects/RankingCTFHTB.png",
     ],
   },
   {
@@ -298,6 +299,7 @@ const PROJECTS = [
     screenshots: [
       "assets/images/projects/Loading.jpg",
       "assets/images/projects/ComingSoon.jpg",
+      "assets/images/projects/RankingMeta4SecCTF.png",
     ],
   },
   {
@@ -336,6 +338,7 @@ const PROJECTS = [
     screenshots: [
       "assets/images/projects/Loading.jpg",
       "assets/images/projects/ComingSoon.jpg",
+      "assets/images/projects/RankingCTFHIDC.png",
     ],
   },
 ];
