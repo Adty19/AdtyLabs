@@ -78,12 +78,12 @@ const EXPERIENCE = [
     desc: "Developed full-stack web applications using PHP, JavaScript, and MySQL by building responsive user interfaces and scalable backend systems. Focused on application performance, database optimization, secure development practices, and delivering reliable user experiences.",
   },
   {
-    logo: "QWRDS",
-    company: "Qwords Cloud Web Hosting Indonesia",
-    role: "Project-Based-Intern Fullstack Developer",
+    logo: "BTPN",
+    company: "BTPN Syariah",
+    role: "Project-Based-Intern Fullstack Developer x Rakamin Academy",
     duration: "Feb 2024 — Mar 2024",
     location: "Remote · Yogyakarta, Indonesia",
-    desc: "Developed to full-stack web development projects by building responsive user interfaces, developing backend features, and managing MySQL databases. Gained experience in web hosting environments, application performance optimization, and scalable web application development.",
+    desc: "Worked on full-stack web development tasks by implementing application features, building interactive and responsive user interfaces, developing backend services, and integrating APIs. Utilized Java and Golang for backend development, Vue.js and JavaScript for frontend development, basic SQL for database management, Postman for API testing and validation, and Git for version control. Gained practical experience in API integration, database operations, software development workflows, and collaborative coding practices.",
   },
   {
     logo: "G2S",
