@@ -320,7 +320,7 @@ const PROJECTS = [
       "Misc",
       "SDR",
     ],
-    demo: "#",
+    demo: "https://medium.com/@adtyyyy/writeup-capture-the-flag-hidc-2026-part-i-538d4552de93",
     github: "https://github.com",
     challenge:
       "Contributed to solving 8 challenges across AI, Cryptography, Web Security, Boot to Root, MISC, Hardware, Digital Forensics, SDR, and Reverse Engineering.",
