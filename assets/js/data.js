@@ -659,8 +659,8 @@ const ARTICLES = [
     height: 400,
     name: "Analyzing Android Malware Disguised As a Digital Wedding Invitation",
     issuer: "Medium",
-    date: "August 2026",
-    url: "https://medium.com/@adtyyyy/analyzing-android-malware-disguised-as-a-digital-wedding-invitation-4bd9c9cab79d",
+    date: "November 2026",
+    url: "https://medium.com/the-repo/analyzing-android-malware-disguised-as-a-digital-wedding-invitation-89ede4c094cc",
   },
 ];
 
