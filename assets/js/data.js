@@ -64,7 +64,7 @@ const EXPERIENCE = [
   {
     logo: "AL",
     company: "AdtyLabs",
-    role: "Web Developer & Pentester",
+    role: "Web Developer & Security Researcher",
     duration: "Jan 2020 — April 2026",
     location: "Remote · Bandar Lampung, Indonesia",
     desc: "Developed secure and scalable web applications using Laravel, PHP, JavaScript, and Tailwind CSS while conducting web and Android penetration testing engagements. Performed reconnaissance, vulnerability assessment, exploitation, post-exploitation analysis, and technical reporting to identify security weaknesses and improve application resilience.",
